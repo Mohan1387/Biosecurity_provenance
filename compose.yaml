@@ -1,0 +1,6 @@
+services:
+  tpc2026:
+    image: tpc2026
+    build:
+      context: .
+      dockerfile: ./Dockerfile

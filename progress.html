@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCP - Hackathon Progress</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --green: #86efac;
+    --green-dark: #22c55e;
+    --blue: #93c5fd;
+    --blue-dark: #3b82f6;
+    --amber: #fcd34d;
+    --amber-dark: #f59e0b;
+    --red: #fca5a5;
+    --red-dark: #ef4444;
+    --gray: #e5e7eb;
+    --gray-dark: #6b7280;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --accent: #818cf8;
+    --accent-glow: rgba(129, 140, 248, 0.3);
+    --pink: #f472b6;
+    --teal: #2dd4bf;
+    --orange: #fb923c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ---- Header ---- */
+  .header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-bottom: 1px solid var(--surface2);
+    padding: 2rem 3rem 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -10%;
+    width: 120%; height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, var(--accent-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; position: relative; }
+  .header h1 span { color: var(--accent); }
+  .header .subtitle { color: var(--text-muted); font-size: 1.05rem; margin-top: 0.3rem; position: relative; }
+
+  /* ---- Overall Progress Bar ---- */
+  .overall-progress {
+    padding: 1.5rem 3rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--surface2);
+    display: flex; align-items: center; gap: 1.5rem;
+  }
+  .overall-progress .label { font-weight: 600; font-size: 0.95rem; white-space: nowrap; }
+  .progress-bar-track {
+    flex: 1; height: 14px; background: var(--surface2); border-radius: 7px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 7px;
+    background: linear-gradient(90deg, var(--green-dark), var(--accent));
+    transition: width 1.5s ease; position: relative;
+  }
+  .progress-bar-fill::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  .progress-pct { font-weight: 700; font-size: 1.3rem; color: var(--accent); min-width: 50px; text-align: right; }
+
+  /* ---- Tabs ---- */
+  .tabs {
+    display: flex; gap: 0; padding: 0 3rem;
+    background: var(--surface); border-bottom: 2px solid var(--surface2);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    padding: 0.9rem 1.6rem; background: none; border: none;
+    color: var(--text-muted); font-size: 0.95rem; font-weight: 500;
+    cursor: pointer; border-bottom: 2px solid transparent;
+    margin-bottom: -2px; transition: all 0.2s; white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  .tab-content { display: none; padding: 2rem 3rem 3rem; }
+  .tab-content.active { display: block; }
+
+  /* ---- Cards ---- */
+  .card {
+    background: var(--surface); border: 1px solid var(--surface2);
+    border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem;
+  }
+  .card h3 { font-size: 1.15rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+  /* ---- Arch grid ---- */
+  .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  @media (max-width: 900px) { .arch-grid { grid-template-columns: 1fr; } }
+
+  .mermaid-container {
+    background: var(--surface); border: 1px solid var(--surface2);
+    border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem;
+    display: flex; justify-content: center;
+  }
+  .mermaid { width: 100%; }
+
+  /* ---- Tech Stack ---- */
+  .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+  .tech-item {
+    background: var(--surface2); border-radius: 10px; padding: 1.2rem; text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .tech-item:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .tech-icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+  .tech-name { font-weight: 600; font-size: 0.95rem; }
+  .tech-role { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem; }
+
+  /* ---- Tables ---- */
+  .tier-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+  .tier-table th, .tier-table td { padding: 0.7rem 1rem; text-align: left; border-bottom: 1px solid var(--surface2); }
+  .tier-table th { color: var(--text-muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tier-badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
+  .tier-open { background: rgba(34,197,94,0.15); color: var(--green-dark); }
+  .tier-controlled { background: rgba(245,158,11,0.15); color: var(--amber-dark); }
+  .tier-restricted { background: rgba(129,140,248,0.15); color: var(--accent); }
+
+  /* ---- Phase cards ---- */
+  .phase-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
+  .phase-card {
+    background: var(--surface); border: 1px solid var(--surface2);
+    border-radius: 12px; padding: 1.5rem; position: relative; overflow: hidden;
+  }
+  .phase-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .phase-card.done::before { background: var(--green-dark); }
+  .phase-card.partial::before { background: var(--amber-dark); }
+  .phase-card.todo::before { background: var(--gray-dark); }
+  .phase-num { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.3rem; }
+  .phase-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.8rem; }
+  .status-badge { display: inline-block; padding: 0.25rem 0.8rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.8rem; }
+  .status-done { background: rgba(34,197,94,0.15); color: var(--green-dark); }
+  .status-partial { background: rgba(245,158,11,0.15); color: var(--amber-dark); }
+  .status-todo { background: rgba(107,114,128,0.15); color: var(--gray-dark); }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 0.35rem 0; font-size: 0.88rem; display: flex; align-items: flex-start; gap: 0.5rem; color: var(--text-muted); }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; }
+  .checklist li.done { color: var(--text); }
+  .checklist li.done .check { color: var(--green-dark); }
+  .checklist li:not(.done) .check { color: var(--surface2); }
+
+  /* ---- Decision / Issue items ---- */
+  .decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 800px) { .decision-grid { grid-template-columns: 1fr; } }
+  .decision-item { background: var(--surface2); border-radius: 10px; padding: 1rem 1.2rem; border-left: 3px solid var(--accent); }
+  .decision-item strong { display: block; margin-bottom: 0.3rem; }
+  .decision-item p { color: var(--text-muted); font-size: 0.88rem; margin: 0; }
+  .issue-item { background: var(--surface2); border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 0.8rem; border-left: 3px solid var(--amber-dark); }
+  .issue-item strong { display: block; margin-bottom: 0.3rem; }
+  .issue-item p { color: var(--text-muted); font-size: 0.88rem; margin: 0; }
+  .issue-item .resolution { margin-top: 0.4rem; color: var(--green-dark); font-size: 0.85rem; }
+
+  /* ---- File tree ---- */
+  .file-tree {
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85rem; line-height: 1.7;
+    background: var(--surface2); border-radius: 10px; padding: 1.5rem;
+    white-space: pre; overflow-x: auto; color: var(--text-muted);
+  }
+  .file-tree .folder { color: var(--blue); }
+  .file-tree .file { color: var(--text); }
+
+  /* ---- Endpoints ---- */
+  .endpoint-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  @media (max-width: 800px) { .endpoint-grid { grid-template-columns: 1fr; } }
+  .endpoint {
+    display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.8rem;
+    background: var(--surface2); border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82rem;
+  }
+  .method { padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; flex-shrink: 0; }
+  .method-get { background: rgba(34,197,94,0.2); color: var(--green-dark); }
+  .method-post { background: rgba(59,130,246,0.2); color: var(--blue-dark); }
+  .method-patch { background: rgba(245,158,11,0.2); color: var(--amber-dark); }
+  .endpoint .path { color: var(--text); }
+  .endpoint .desc { color: var(--text-muted); margin-left: auto; font-family: 'Segoe UI', sans-serif; font-size: 0.78rem; }
+
+  /* ---- Flow animation ---- */
+  .flow-container { display: flex; align-items: center; justify-content: center; gap: 0; padding: 2rem 0; flex-wrap: wrap; }
+  .flow-box {
+    background: var(--surface2); border: 1px solid var(--surface2); border-radius: 12px;
+    padding: 1rem 1.5rem; text-align: center; min-width: 130px; transition: all 0.3s;
+  }
+  .flow-box:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+  .flow-box .icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+  .flow-box .name { font-weight: 600; font-size: 0.9rem; }
+  .flow-box .detail { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.2rem; }
+  .flow-arrow { font-size: 1.5rem; color: var(--accent); padding: 0 0.6rem; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  /* ---- Section heading ---- */
+  .section-heading { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; }
+  .section-heading .icon { font-size: 1.4rem; }
+
+  /* ---- Stat pills ---- */
+  .stats-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .stat-pill {
+    background: var(--surface); border: 1px solid var(--surface2); border-radius: 10px;
+    padding: 1rem 1.5rem; flex: 1; min-width: 120px; text-align: center;
+  }
+  .stat-pill .value { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .stat-pill .label { color: var(--text-muted); font-size: 0.82rem; margin-top: 0.2rem; }
+
+  /* ---- Agent cards ---- */
+  .agent-card {
+    background: var(--surface); border: 1px solid var(--surface2); border-radius: 14px;
+    padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden;
+  }
+  .agent-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  }
+  .agent-card.agent-collector::before { background: linear-gradient(90deg, var(--blue-dark), var(--teal)); }
+  .agent-card.agent-profiler::before { background: linear-gradient(90deg, var(--pink), var(--accent)); }
+  .agent-card.agent-detector::before { background: linear-gradient(90deg, var(--red-dark), var(--orange)); }
+  .agent-card.agent-clusterer::before { background: linear-gradient(90deg, var(--teal), var(--green-dark)); }
+  .agent-card.agent-claude::before { background: linear-gradient(90deg, var(--amber-dark), var(--green-dark)); }
+
+  .agent-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .agent-icon { font-size: 2.5rem; }
+  .agent-header h3 { font-size: 1.3rem; font-weight: 700; margin: 0; }
+  .agent-header .agent-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.15rem; }
+  .agent-body { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 800px) { .agent-body { grid-template-columns: 1fr; } }
+  .agent-section h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.6rem; }
+  .agent-section ul { list-style: none; padding: 0; }
+  .agent-section li { padding: 0.3rem 0; font-size: 0.88rem; color: var(--text); display: flex; align-items: flex-start; gap: 0.4rem; }
+  .agent-tag {
+    display: inline-block; padding: 0.15rem 0.6rem; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 600; margin-right: 0.3rem;
+  }
+  .tag-model { background: rgba(129,140,248,0.15); color: var(--accent); }
+  .tag-trigger { background: rgba(45,212,191,0.15); color: var(--teal); }
+  .tag-data { background: rgba(244,114,182,0.15); color: var(--pink); }
+  .tag-output { background: rgba(251,146,60,0.15); color: var(--orange); }
+
+  /* ---- Footer ---- */
+  .footer {
+    text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.82rem;
+    border-top: 1px solid var(--surface2); margin-top: 2rem;
+  }
+
+  /* ---- Results Tab ---- */
+  .results-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .result-stat {
+    background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px;
+    padding: 1.2rem; text-align: center;
+  }
+  .result-stat .big { font-size: 2.2rem; font-weight: 800; }
+  .result-stat .big.green { color: var(--green-dark); }
+  .result-stat .big.red { color: var(--red-dark); }
+  .result-stat .big.amber { color: var(--amber-dark); }
+  .result-stat .big.accent { color: var(--accent); }
+  .result-stat .desc { color: var(--text-muted); font-size: 0.82rem; margin-top: 0.3rem; }
+
+  .finding-card {
+    background: var(--surface); border: 1px solid var(--surface2); border-radius: 14px;
+    padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden;
+  }
+  .finding-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+  .finding-card.detected::before { background: linear-gradient(90deg, var(--green-dark), var(--teal)); }
+  .finding-card.partial::before { background: linear-gradient(90deg, var(--amber-dark), var(--orange)); }
+  .finding-card.missed::before { background: linear-gradient(90deg, var(--red-dark), #ff6b6b); }
+  .finding-card h3 { font-size: 1.15rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.6rem; }
+
+  .verdict { display: inline-block; padding: 0.2rem 0.8rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
+  .verdict-detected { background: rgba(34,197,94,0.15); color: var(--green-dark); }
+  .verdict-partial { background: rgba(245,158,11,0.15); color: var(--amber-dark); }
+  .verdict-missed { background: rgba(239,68,68,0.15); color: var(--red-dark); }
+
+  .evidence-table { width: 100%; border-collapse: collapse; margin-top: 0.8rem; font-size: 0.88rem; }
+  .evidence-table th { padding: 0.6rem 0.8rem; text-align: left; color: var(--text-muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--surface2); }
+  .evidence-table td { padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--surface2); vertical-align: top; }
+  .evidence-table tr:hover td { background: rgba(129,140,248,0.05); }
+
+  .score-bar { display: inline-block; height: 8px; border-radius: 4px; min-width: 4px; vertical-align: middle; margin-right: 0.5rem; }
+  .score-bar.high { background: var(--red-dark); }
+  .score-bar.medium { background: var(--amber-dark); }
+  .score-bar.low { background: var(--green-dark); }
+
+  .query-sample { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem; color: var(--text-muted); background: var(--surface2); padding: 0.3rem 0.6rem; border-radius: 6px; display: block; margin: 0.2rem 0; }
+  .query-suspicious { border-left: 3px solid var(--red-dark); }
+  .query-drift { border-left: 3px solid var(--amber-dark); }
+  .query-normal { border-left: 3px solid var(--green-dark); }
+
+  .timeline-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.3rem 0; font-size: 0.82rem; }
+  .timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .timeline-dot.on-topic { background: var(--green-dark); }
+  .timeline-dot.off-topic { background: var(--red-dark); }
+  .timeline-dot.drift { background: var(--amber-dark); }
+  .timeline-dot.suspicious { background: var(--red-dark); box-shadow: 0 0 6px var(--red-dark); }
+  .timeline-ts { color: var(--text-muted); font-family: 'SF Mono', monospace; font-size: 0.78rem; min-width: 90px; }
+
+  .detection-matrix { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  .detection-matrix th, .detection-matrix td { padding: 0.7rem 1rem; text-align: center; border-bottom: 1px solid var(--surface2); }
+  .detection-matrix th { color: var(--text-muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; }
+  .detection-matrix td:first-child { text-align: left; font-weight: 600; }
+  .matrix-yes { color: var(--green-dark); font-weight: 700; }
+  .matrix-partial { color: var(--amber-dark); font-weight: 700; }
+  .matrix-no { color: var(--red-dark); font-weight: 700; }
+
+  .persona-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; margin: 1rem 0; }
+  .persona-box {
+    background: var(--surface2); border-radius: 12px; padding: 1.5rem;
+    border-top: 3px solid var(--accent);
+  }
+  .persona-box h4 { margin-bottom: 0.6rem; font-size: 1rem; }
+  .persona-box .count { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+  .persona-box .members { color: var(--text-muted); font-size: 0.82rem; margin-top: 0.5rem; line-height: 1.6; }
+  .persona-box .features { margin-top: 0.8rem; font-size: 0.82rem; }
+  .persona-box .features span { display: inline-block; margin: 0.15rem 0.2rem; padding: 0.15rem 0.5rem; background: rgba(129,140,248,0.1); border-radius: 4px; }
+
+  .collusion-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+  @media (max-width: 800px) { .collusion-pair { grid-template-columns: 1fr; } }
+  .collusion-user { background: var(--surface2); border-radius: 12px; padding: 1.5rem; }
+  .collusion-user h4 { margin-bottom: 0.8rem; }
+
+  .insight-box {
+    background: rgba(129,140,248,0.08); border: 1px solid rgba(129,140,248,0.2);
+    border-radius: 10px; padding: 1.2rem 1.5rem; margin: 1rem 0;
+  }
+  .insight-box h4 { color: var(--accent); margin-bottom: 0.5rem; font-size: 0.9rem; }
+  .insight-box p { color: var(--text-muted); font-size: 0.88rem; margin: 0; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1><span>TCP</span> Tiered Compute Platform</h1>
+  <div class="subtitle">Hackathon Progress Tracker &mdash; Tiered-Access AI Research Platform Prototype</div>
+</div>
+
+<!-- Overall Progress -->
+<div class="overall-progress">
+  <div class="label">Overall Progress</div>
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" style="width: 75%"></div>
+  </div>
+  <div class="progress-pct">75%</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab(this,'arch')">Architecture</button>
+  <button class="tab-btn" onclick="switchTab(this,'agents')">Agents</button>
+  <button class="tab-btn" onclick="switchTab(this,'results')">Results</button>
+  <button class="tab-btn" onclick="switchTab(this,'progress')">Phase Progress</button>
+  <button class="tab-btn" onclick="switchTab(this,'details')">Implementation Log</button>
+  <button class="tab-btn" onclick="switchTab(this,'roadmap')">Roadmap</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: Architecture                                             -->
+<!-- ============================================================ -->
+<div id="tab-arch" class="tab-content active">
+
+  <div class="stats-row">
+    <div class="stat-pill"><div class="value">2</div><div class="label">Services</div></div>
+    <div class="stat-pill"><div class="value">3</div><div class="label">Access Tiers</div></div>
+    <div class="stat-pill"><div class="value">6</div><div class="label">Phases</div></div>
+    <div class="stat-pill"><div class="value">9</div><div class="label">DB Models</div></div>
+    <div class="stat-pill"><div class="value">5</div><div class="label">AI Agents</div></div>
+    <div class="stat-pill"><div class="value">24</div><div class="label">API Endpoints</div></div>
+  </div>
+
+  <!-- System Architecture -->
+  <div class="section-heading"><span class="icon">🏗️</span> System Architecture</div>
+  <div class="mermaid-container">
+    <pre class="mermaid">
+flowchart TB
+  subgraph Frontend["🖥️ Frontend — Streamlit :8501"]
+    direction TB
+    login["Login / Register"]
+    admin_ui["Admin Panel"]
+    chat_ui["Chat UI"]
+    warnings_ui["Warnings Dashboard<br/>(Phase 5)"]
+  end
+
+  subgraph Backend["⚙️ Backend — FastAPI :8000"]
+    direction TB
+    auth_ep["Auth Router<br/>/auth/*"]
+    admin_ep["Admin Router<br/>/admin/*"]
+    chat_ep["Chat Router<br/>/api/v1/chat/*"]
+    profiler_ep["Profiler Router<br/>/admin/profiler/*"]
+    detector_ep["Detector Router<br/>/admin/detector/*"]
+    clusterer_ep["Clusterer Router<br/>/admin/clusterer/*"]
+  end
+
+  subgraph Agents["🤖 Agent Pipeline"]
+    direction TB
+    claude_agent["Claude Agent<br/>Tier-gated tool-use loop"]
+    collector["Logger<br/>Activity logging"]
+    profiler["Profiler Agent<br/>ORCID profile builder"]
+    detector["Detector Agent<br/>Anomaly detection"]
+    clusterer["Clusterer Agent<br/>Behavioral clustering"]
+  end
+
+  subgraph Data["💾 Data Layer"]
+    sqlite[("SQLite<br/>9 tables")]
+    mock["Mock Data Sources<br/>Docs, datasets, APIs"]
+  end
+
+  subgraph External["☁️ External APIs"]
+    anthropic["Anthropic Claude API"]
+    orcid["ORCID Public API v3.0"]
+  end
+
+  login -->|JWT| auth_ep
+  admin_ui -->|CRUD| admin_ep
+  chat_ui -->|Messages| chat_ep
+  warnings_ui --> detector_ep
+
+  chat_ep --> claude_agent
+  chat_ep -->|"after response"| collector
+  profiler_ep --> profiler
+  detector_ep --> detector
+  clusterer_ep --> clusterer
+
+  claude_agent -->|tool calls| mock
+  claude_agent --> anthropic
+  profiler --> orcid
+  detector -->|reads| sqlite
+
+  collector --> sqlite
+  profiler --> sqlite
+  detector --> sqlite
+  clusterer -->|reads| sqlite
+  auth_ep --> sqlite
+  admin_ep --> sqlite
+  claude_agent --> sqlite
+
+  style Frontend fill:#1e293b,stroke:#818cf8,color:#f1f5f9
+  style Backend fill:#1e293b,stroke:#3b82f6,color:#f1f5f9
+  style Agents fill:#1e293b,stroke:#f472b6,color:#f1f5f9
+  style Data fill:#1e293b,stroke:#22c55e,color:#f1f5f9
+  style External fill:#1e293b,stroke:#f59e0b,color:#f1f5f9
+    </pre>
+  </div>
+
+  <!-- Request Flow -->
+  <div class="section-heading"><span class="icon">🔄</span> Chat Request Flow</div>
+  <div class="flow-container">
+    <div class="flow-box">
+      <div class="icon">👤</div>
+      <div class="name">User</div>
+      <div class="detail">Browser</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="icon">🖥️</div>
+      <div class="name">Streamlit</div>
+      <div class="detail">:8501</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="icon">⚡</div>
+      <div class="name">FastAPI</div>
+      <div class="detail">:8000</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="icon">🤖</div>
+      <div class="name">Claude Agent</div>
+      <div class="detail">Tier-gated tools</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="icon">📝</div>
+      <div class="name">Logger</div>
+      <div class="detail">Logs query</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="icon">💾</div>
+      <div class="name">SQLite</div>
+      <div class="detail">9 tables</div>
+    </div>
+  </div>
+
+  <!-- Tech Stack -->
+  <div class="section-heading"><span class="icon">🛠️</span> Tech Stack</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-icon">⚡</div><div class="tech-name">FastAPI</div><div class="tech-role">Backend API</div></div>
+    <div class="tech-item"><div class="tech-icon">🖥️</div><div class="tech-name">Streamlit</div><div class="tech-role">Frontend UI</div></div>
+    <div class="tech-item"><div class="tech-icon">💾</div><div class="tech-name">SQLite</div><div class="tech-role">Database</div></div>
+    <div class="tech-item"><div class="tech-icon">🔗</div><div class="tech-name">SQLAlchemy</div><div class="tech-role">Async ORM</div></div>
+    <div class="tech-item"><div class="tech-icon">🤖</div><div class="tech-name">Claude (Anthropic)</div><div class="tech-role">LLM Agent</div></div>
+    <div class="tech-item"><div class="tech-icon">🔐</div><div class="tech-name">JWT + bcrypt</div><div class="tech-role">Auth</div></div>
+    <div class="tech-item"><div class="tech-icon">🐳</div><div class="tech-name">Docker Compose</div><div class="tech-role">Orchestration</div></div>
+    <div class="tech-item"><div class="tech-icon">🐍</div><div class="tech-name">Python 3.12</div><div class="tech-role">Runtime</div></div>
+    <div class="tech-item"><div class="tech-icon">🆔</div><div class="tech-name">ORCID API v3</div><div class="tech-role">Publication data</div></div>
+    <div class="tech-item"><div class="tech-icon">📊</div><div class="tech-name">scikit-learn</div><div class="tech-role">ML (KMeans, LOF, TF-IDF)</div></div>
+  </div>
+
+  <!-- Access Tiers -->
+  <div class="card" style="margin-top: 1.5rem;">
+    <h3>🔒 Tiered Access Control</h3>
+    <table class="tier-table">
+      <thead><tr><th>Tier</th><th>Data Access</th><th>Tools Available</th><th>Admin</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tier-badge tier-open">Open</span></td><td>Public docs only</td><td>search_public_docs, get_platform_info</td><td>No</td></tr>
+        <tr><td><span class="tier-badge tier-controlled">Controlled</span></td><td>+ Sensitive datasets</td><td>+ query_research_data, analyze_dataset</td><td>No</td></tr>
+        <tr><td><span class="tier-badge tier-restricted">Restricted</span></td><td>All data</td><td>+ list_platform_users, get_usage_stats</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- API Endpoints -->
+  <div class="card">
+    <h3>📡 API Endpoints (24 total)</h3>
+    <div style="margin-bottom: 0.8rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Auth &amp; Admin</div>
+    <div class="endpoint-grid" style="margin-bottom: 1rem;">
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/auth/register</span><span class="desc">Register user</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/auth/login</span><span class="desc">Login, get JWT</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="path">/auth/me</span><span class="desc">Current user</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="path">/admin/users</span><span class="desc">List users</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/admin/users</span><span class="desc">Create user</span></div>
+      <div class="endpoint"><span class="method method-patch">PATCH</span><span class="path">/admin/users/{id}</span><span class="desc">Update user</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/admin/users/{id}/reset-password</span><span class="desc">Reset password</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/admin/users/delete</span><span class="desc">Bulk delete</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="path">/health</span><span class="desc">Health check</span></div>
+    </div>
+    <div style="margin-bottom: 0.8rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Chat (Claude Agent)</div>
+    <div class="endpoint-grid" style="margin-bottom: 1rem;">
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/api/v1/chat</span><span class="desc">Send message</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="path">/api/v1/chat/history</span><span class="desc">Conversation history</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/api/v1/chat/reset</span><span class="desc">Clear conversation</span></div>
+    </div>
+    <div style="margin-bottom: 0.8rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Profiler Agent (ORCID)</div>
+    <div class="endpoint-grid" style="margin-bottom: 1rem;">
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/admin/profiler/fetch/{user_id}</span><span class="desc">Fetch user profile</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/admin/profiler/fetch-all</span><span class="desc">Batch refresh all</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="path">/admin/profiler/profile/{user_id}</span><span class="desc">View profile + pubs</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="path">/admin/profiler/status</span><span class="desc">Cache freshness</span></div>
+    </div>
+    <div style="margin-bottom: 0.8rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Detector Agent (Anomaly Detection)</div>
+    <div class="endpoint-grid">
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/admin/detector/scan</span><span class="desc">Trigger scan</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="path">/admin/detector/warnings</span><span class="desc">List warnings</span></div>
+      <div class="endpoint"><span class="method method-patch">PATCH</span><span class="path">/admin/detector/warnings/{id}</span><span class="desc">Review/dismiss</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="path">/admin/detector/user/{id}/profile</span><span class="desc">Research profile</span></div>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="path">/admin/detector/user/{id}/queries</span><span class="desc">Query history</span></div>
+    </div>
+    <div style="margin-bottom: 0.8rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Clusterer Agent (Behavioral Clustering)</div>
+    <div class="endpoint-grid">
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/admin/clusterer/analyze</span><span class="desc">Run full pipeline</span></div>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="path">/admin/clusterer/analyze/save</span><span class="desc">Run + save artifacts</span></div>
+    </div>
+  </div>
+
+  <!-- DB Schema -->
+  <div class="section-heading"><span class="icon">🗄️</span> Database Schema (9 models)</div>
+  <div class="mermaid-container">
+    <pre class="mermaid">
+erDiagram
+    USER {
+        int id PK
+        string username UK
+        string orcid_id UK
+        string hashed_password
+        string tier "open|controlled|restricted"
+        string research_interest
+        bool is_active
+        datetime created_at
+    }
+    CONVERSATION_MESSAGE {
+        int id PK
+        int user_id FK
+        string role
+        text content
+        datetime created_at
+    }
+    QUERY_HISTORY {
+        int id PK
+        int user_id FK
+        text query_text
+        text tools_invoked
+        text response_summary
+        datetime timestamp
+    }
+    DATA_ACCESS_LOG {
+        int id PK
+        int user_id FK
+        string dataset_name
+        string dataset_tier
+        string access_type
+        datetime timestamp
+    }
+    ORCID_PUBLICATION {
+        int id PK
+        int user_id FK
+        string orcid_id
+        int put_code
+        string title
+        string journal
+        int pub_year
+        string pub_type
+        string external_url
+    }
+    ORCID_PROFILE {
+        int id PK
+        int user_id FK
+        text topic_summary
+        int pub_count
+        datetime last_refreshed
+    }
+    USER_WARNING {
+        int id PK
+        int user_id FK
+        string warning_type
+        string severity "low|medium|high"
+        json detail
+        string status "pending|reviewed|dismissed"
+        int reviewed_by
+        datetime reviewed_at
+    }
+    AUDIT_LOG {
+        int id PK
+        int user_id FK
+        string action
+        json detail_json
+        datetime timestamp
+    }
+    LLM_USAGE {
+        int id PK
+        int user_id FK
+        string model
+        int input_tokens
+        int output_tokens
+        float cost_estimate
+        datetime timestamp
+    }
+    USER ||--o{ CONVERSATION_MESSAGE : "chats"
+    USER ||--o{ QUERY_HISTORY : "queries"
+    USER ||--o{ DATA_ACCESS_LOG : "accesses"
+    USER ||--o{ ORCID_PUBLICATION : "publishes"
+    USER ||--|| ORCID_PROFILE : "has"
+    USER ||--o{ USER_WARNING : "flagged"
+    USER ||--o{ AUDIT_LOG : "generates"
+    USER ||--o{ LLM_USAGE : "incurs"
+    </pre>
+  </div>
+
+  <!-- Project Structure -->
+  <div class="card">
+    <h3>📁 Project Structure</h3>
+    <div class="file-tree"><span class="folder">2026TCP/</span>
+├── <span class="folder">backend/</span>
+│   ├── <span class="folder">app/</span>
+│   │   ├── <span class="file">main.py</span>              FastAPI app + middleware
+│   │   ├── <span class="file">config.py</span>            Env-based settings
+│   │   ├── <span class="file">database.py</span>          Async SQLAlchemy + aiosqlite
+│   │   ├── <span class="file">models.py</span>            9 SQLAlchemy models
+│   │   ├── <span class="file">schemas.py</span>           Pydantic request/response
+│   │   ├── <span class="file">auth.py</span>              JWT + bcrypt + deps
+│   │   ├── <span class="folder">routers/</span>
+│   │   │   ├── <span class="file">auth.py</span>          register, login, me
+│   │   │   ├── <span class="file">admin.py</span>         User CRUD (restricted)
+│   │   │   ├── <span class="file">chat.py</span>          Chat + collector integration
+│   │   │   ├── <span class="file">profiler.py</span>       ORCID admin endpoints
+│   │   │   ├── <span class="file">detector.py</span>         Anomaly scan endpoints
+│   │   │   └── <span class="file">clusterer.py</span>         Behavioral clustering endpoints
+│   │   └── <span class="folder">services/</span>
+│   │       ├── <span class="file">agent.py</span>         AgentService (Claude)
+│   │       ├── <span class="file">tools.py</span>         Tier-gated tool registry
+│   │       └── <span class="folder">agents/</span>
+│   │           ├── <span class="file">logger.py</span>  Activity logger
+│   │           ├── <span class="file">profiler.py</span>         ORCID profiles
+│   │           ├── <span class="file">detector.py</span>           Anomaly scoring
+│   │           └── <span class="folder">clusterer/</span>             Behavioral clustering
+│   │               ├── <span class="file">pipeline.py</span>    Orchestration
+│   │               ├── <span class="file">feature_engineering.py</span>
+│   │               ├── <span class="file">persona_model.py</span>
+│   │               ├── <span class="file">anomaly_detection.py</span>
+│   │               ├── <span class="file">adapter.py</span>     TCP DB adapter
+│   │               └── <span class="file">reporting.py</span>
+│   ├── <span class="file">seed.py</span>                  25 users + simulated queries
+│   ├── <span class="file">requirements.txt</span>
+│   └── <span class="file">Dockerfile</span>
+├── <span class="folder">frontend/</span>
+│   ├── <span class="file">app.py</span>                   Streamlit main
+│   ├── <span class="folder">pages/</span>
+│   │   ├── <span class="file">admin.py</span>             User management
+│   │   └── <span class="file">chat.py</span>              Chat interface
+│   ├── <span class="file">requirements.txt</span>
+│   └── <span class="file">Dockerfile</span>
+├── <span class="folder">agents/</span>                     Agent planning docs
+├── <span class="file">docker-compose.yml</span>
+├── <span class="file">.env.example</span>
+└── <span class="file">README.md</span></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: Agents                                                   -->
+<!-- ============================================================ -->
+<div id="tab-agents" class="tab-content">
+
+  <div class="section-heading"><span class="icon">🤖</span> Agent Pipeline Overview</div>
+
+  <!-- Simplified workflow diagram -->
+  <div class="mermaid-container">
+    <pre class="mermaid">
+flowchart LR
+  user(["👤 Researcher"])
+
+  subgraph CHAT["Real-time: Every Chat Message"]
+    direction LR
+    claude["🤖 Claude Agent<br/>Answers query using<br/>tier-gated tools"]
+    collector["📝 Logger<br/>Logs query + tools +<br/>data access events"]
+  end
+
+  subgraph ADMIN["On-Demand: Admin Triggers"]
+    direction LR
+    profiler["🔬 Profiler Agent<br/>Fetches ORCID pubs,<br/>builds topic profile"]
+    detector["🚨 Detector Agent<br/>Scores divergence,<br/>flags anomalies"]
+    clusterer["📈 Clusterer Agent<br/>Behavioral clustering,<br/>LOF anomaly detection"]
+  end
+
+  sqlite[("💾 SQLite")]
+
+  user -->|sends message| claude
+  claude -->|response| user
+  claude -->|"after response"| collector
+  collector -->|writes| sqlite
+
+  sqlite -->|publications| profiler
+  profiler -->|profiles| sqlite
+  sqlite -->|queries + profiles| detector
+  detector -->|warnings| sqlite
+  sqlite -->|query events| clusterer
+  clusterer -->|personas + anomalies| sqlite
+
+  style CHAT fill:#1e293b,stroke:#3b82f6,color:#f1f5f9
+  style ADMIN fill:#1e293b,stroke:#f472b6,color:#f1f5f9
+    </pre>
+  </div>
+
+  <!-- Claude Agent -->
+  <div class="agent-card agent-claude">
+    <div class="agent-header">
+      <div class="agent-icon">🤖</div>
+      <div>
+        <h3>Claude Agent</h3>
+        <div class="agent-subtitle">User-Facing LLM &mdash; Tier-Gated Research Assistant</div>
+      </div>
+    </div>
+    <div class="agent-body">
+      <div class="agent-section">
+        <h4>What It Does</h4>
+        <ul>
+          <li>Wraps Anthropic Messages API with full tool-use agentic loop</li>
+          <li>Dynamically templates system prompt based on user tier</li>
+          <li>Iterates: Claude calls tools, results fed back, loops until final answer</li>
+          <li>Persists conversation history to SQLite per user</li>
+        </ul>
+      </div>
+      <div class="agent-section">
+        <h4>Tools by Tier</h4>
+        <ul>
+          <li><span class="agent-tag tag-trigger">Open</span> search_public_docs, get_platform_info</li>
+          <li><span class="agent-tag tag-data">Controlled</span> + query_research_data, analyze_dataset</li>
+          <li><span class="agent-tag tag-output">Restricted</span> + list_platform_users, get_usage_stats</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top: 1rem;">
+      <span class="agent-tag tag-trigger">Trigger</span> Every user chat message
+      <span class="agent-tag tag-model" style="margin-left: 0.5rem;">File</span> <code style="font-size: 0.82rem; color: var(--text-muted);">services/agent.py + services/tools.py</code>
+    </div>
+  </div>
+
+  <!-- Logger -->
+  <div class="agent-card agent-collector">
+    <div class="agent-header">
+      <div class="agent-icon">📝</div>
+      <div>
+        <h3>Logger Agent</h3>
+        <div class="agent-subtitle">Silent Logger &mdash; Records Every Interaction</div>
+      </div>
+    </div>
+    <div class="agent-body">
+      <div class="agent-section">
+        <h4>What It Does</h4>
+        <ul>
+          <li>Runs inline after every chat response (no separate trigger)</li>
+          <li>Stores query text, tools invoked, and response summary</li>
+          <li>Records data access events (dataset name, tier, access type)</li>
+          <li>Builds the corpus that Detector later analyzes</li>
+        </ul>
+      </div>
+      <div class="agent-section">
+        <h4>Data Written</h4>
+        <ul>
+          <li><span class="agent-tag tag-data">Table</span> QueryHistory (user, query, tools, summary)</li>
+          <li><span class="agent-tag tag-data">Table</span> DataAccessLog (user, dataset, tier, type)</li>
+        </ul>
+        <h4 style="margin-top: 0.8rem;">Key Design</h4>
+        <ul>
+          <li>Zero-latency: inline function calls, no queue</li>
+          <li>Feeds downstream agents (Detector) with rich activity data</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top: 1rem;">
+      <span class="agent-tag tag-trigger">Trigger</span> Automatically after every chat response
+      <span class="agent-tag tag-model" style="margin-left: 0.5rem;">File</span> <code style="font-size: 0.82rem; color: var(--text-muted);">services/agents/logger.py</code>
+    </div>
+  </div>
+
+  <!-- Profiler Agent -->
+  <div class="agent-card agent-profiler">
+    <div class="agent-header">
+      <div class="agent-icon">🔬</div>
+      <div>
+        <h3>Profiler Agent</h3>
+        <div class="agent-subtitle">ORCID Profile Builder &mdash; Knows What Users Actually Research</div>
+      </div>
+    </div>
+    <div class="agent-body">
+      <div class="agent-section">
+        <h4>What It Does</h4>
+        <ul>
+          <li>Calls ORCID Public API v3.0 to fetch a user's real publications</li>
+          <li>Extracts keywords from publication titles (frequency-based)</li>
+          <li>Builds a topic summary profile per user</li>
+          <li>30-day TTL cache; can force-refresh</li>
+        </ul>
+      </div>
+      <div class="agent-section">
+        <h4>Data Written</h4>
+        <ul>
+          <li><span class="agent-tag tag-data">Table</span> OrcidPublication (title, journal, year, type, URL)</li>
+          <li><span class="agent-tag tag-data">Table</span> OrcidProfile (topic_summary, pub_count, last_refreshed)</li>
+        </ul>
+        <h4 style="margin-top: 0.8rem;">Endpoints</h4>
+        <ul>
+          <li><span class="agent-tag tag-output">POST</span> /admin/profiler/fetch/{user_id} or /fetch-all</li>
+          <li><span class="agent-tag tag-output">GET</span> /admin/profiler/profile/{user_id} or /status</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top: 1rem;">
+      <span class="agent-tag tag-trigger">Trigger</span> Admin-initiated (single or batch)
+      <span class="agent-tag tag-model" style="margin-left: 0.5rem;">File</span> <code style="font-size: 0.82rem; color: var(--text-muted);">services/agents/profiler.py</code>
+    </div>
+  </div>
+
+  <!-- Detector Agent -->
+  <div class="agent-card agent-detector">
+    <div class="agent-header">
+      <div class="agent-icon">🚨</div>
+      <div>
+        <h3>Detector Agent</h3>
+        <div class="agent-subtitle">Anomaly Detection Engine &mdash; Flags Off-Topic Researchers</div>
+      </div>
+    </div>
+    <div class="agent-body">
+      <div class="agent-section">
+        <h4>What It Does</h4>
+        <ul>
+          <li>Two-check divergence scan per user:</li>
+          <li>&nbsp;&nbsp;1. Query keywords vs declared research_interest</li>
+          <li>&nbsp;&nbsp;2. Query keywords vs ORCID publications (if available)</li>
+          <li>Recall-based keyword overlap scoring with stemming</li>
+          <li>Severity mapping: low / medium / high</li>
+          <li>Skips users with &lt; 5 queries (noise threshold)</li>
+        </ul>
+      </div>
+      <div class="agent-section">
+        <h4>Scoring Tuning</h4>
+        <ul>
+          <li><span class="agent-tag tag-output">Threshold</span> INTEREST_THRESHOLD = 0.15</li>
+          <li><span class="agent-tag tag-output">Min Queries</span> MIN_QUERIES_FOR_SCAN = 5</li>
+          <li><span class="agent-tag tag-trigger">Legit range</span> 0.25 &ndash; 1.0 score</li>
+          <li><span class="agent-tag tag-data">Flagged range</span> 0.0 &ndash; 0.125 score</li>
+        </ul>
+        <h4 style="margin-top: 0.8rem;">Verified Results</h4>
+        <ul>
+          <li>&#10003; Flags exactly 2/25 users: t_chen (high), l_martinez (medium)</li>
+          <li>&#10003; All 23 legitimate vaccine researchers pass clean</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top: 1rem;">
+      <span class="agent-tag tag-trigger">Trigger</span> Admin-initiated scan (single or all)
+      <span class="agent-tag tag-model" style="margin-left: 0.5rem;">File</span> <code style="font-size: 0.82rem; color: var(--text-muted);">services/agents/detector.py</code>
+    </div>
+  </div>
+
+  <!-- Clusterer Agent -->
+  <div class="agent-card agent-clusterer">
+    <div class="agent-header">
+      <div class="agent-icon">📈</div>
+      <div>
+        <h3>Clusterer Agent</h3>
+        <div class="agent-subtitle">Behavioral Clustering &amp; LOF Anomaly Detection</div>
+      </div>
+    </div>
+    <div class="agent-body">
+      <div class="agent-section">
+        <h4>What It Does</h4>
+        <ul>
+          <li>Reads all query events from SQLite via TCP adapter</li>
+          <li>Engineers 33 behavioral features per user (volume, timing, prompt/response lengths, TF-IDF text features via SVD)</li>
+          <li>KMeans clustering with silhouette-based k selection (k=2..6)</li>
+          <li>Local Outlier Factor (LOF) for cross-user anomaly scoring</li>
+          <li>Within-user z-score anomaly detection on event level</li>
+        </ul>
+      </div>
+      <div class="agent-section">
+        <h4>Pipeline Stages</h4>
+        <ul>
+          <li><span class="agent-tag tag-model">1</span> adapter.py: TCP SQLite &rarr; flat event table</li>
+          <li><span class="agent-tag tag-model">2</span> feature_engineering.py: behavioral + TF-IDF features</li>
+          <li><span class="agent-tag tag-model">3</span> persona_model.py: KMeans persona assignment</li>
+          <li><span class="agent-tag tag-model">4</span> anomaly_detection.py: LOF + within-user z-scores</li>
+          <li><span class="agent-tag tag-model">5</span> reporting.py: JSON/CSV artifact generation</li>
+        </ul>
+        <h4 style="margin-top: 0.8rem;">Endpoints</h4>
+        <ul>
+          <li><span class="agent-tag tag-output">POST</span> /admin/clusterer/analyze (run pipeline)</li>
+          <li><span class="agent-tag tag-output">POST</span> /admin/clusterer/analyze/save (run + persist artifacts)</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top: 1rem;">
+      <span class="agent-tag tag-trigger">Trigger</span> Admin-initiated (full pipeline)
+      <span class="agent-tag tag-model" style="margin-left: 0.5rem;">File</span> <code style="font-size: 0.82rem; color: var(--text-muted);">services/agents/clusterer/ (6 modules)</code>
+    </div>
+  </div>
+
+  <!-- Sequence diagram: where agents deploy -->
+  <div class="section-heading"><span class="icon">⚡</span> Agent Deployment Points</div>
+  <div class="mermaid-container">
+    <pre class="mermaid">
+sequenceDiagram
+    actor User
+    participant UI as Streamlit
+    participant API as FastAPI
+    participant Claude as Claude Agent
+    participant Tools as Tool Registry
+    participant Collector as Logger
+    participant DB as SQLite
+
+    User->>UI: Send chat message
+    UI->>API: POST /api/v1/chat
+    API->>Claude: invoke(message, user_tier)
+    loop Tool-Use Loop
+        Claude->>Tools: call tool (tier-filtered)
+        Tools-->>Claude: tool result
+    end
+    Claude-->>API: final response + tool_calls
+    API->>Collector: record_query(query, tools, summary)
+    Collector->>DB: INSERT QueryHistory
+    API->>Collector: record_data_access(datasets)
+    Collector->>DB: INSERT DataAccessLog
+    API-->>UI: response JSON
+    UI-->>User: Display answer + tool viz
+
+    Note over DB: Later, admin triggers...
+
+    actor Admin
+    Admin->>API: POST /admin/profiler/fetch-all
+    API->>DB: fetch users with ORCID iDs
+    API-->>API: Profiler: fetch ORCID API, build profiles
+    API->>DB: UPSERT OrcidProfile + OrcidPublication
+
+    Admin->>API: POST /admin/detector/scan
+    API->>DB: read QueryHistory + OrcidProfile
+    API-->>API: Detector: score divergence per user
+    API->>DB: INSERT UserWarning (if flagged)
+    API-->>Admin: scan results + warning count
+
+    Admin->>API: POST /admin/clusterer/analyze
+    API->>DB: read all QueryHistory events
+    API-->>API: Clusterer: feature engineering + KMeans + LOF
+    API-->>Admin: persona assignments + anomaly scores
+    </pre>
+  </div>
+
+  <!-- Seed data summary -->
+  <div class="card">
+    <h3>🌱 Seed Data (25 Users + Admin)</h3>
+    <table class="tier-table">
+      <thead><tr><th>Group</th><th>Count</th><th>Tier</th><th>Query Range</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Super Users</td><td>5</td><td><span class="tier-badge tier-restricted">Restricted</span></td><td>25-40 queries</td><td>Heavy usage, vaccine domain</td></tr>
+        <tr><td>Average Users</td><td>15</td><td><span class="tier-badge tier-controlled">Controlled</span></td><td>8-18 queries</td><td>Includes 2 mismatched users</td></tr>
+        <tr><td>Irregular Users</td><td>5</td><td><span class="tier-badge tier-open">Open</span></td><td>1-3 queries</td><td>Below scan threshold</td></tr>
+        <tr><td style="color: var(--red-dark);">t_chen (mismatched)</td><td>1</td><td><span class="tier-badge tier-controlled">Controlled</span></td><td>~15 queries</td><td>Astrophysics researcher, 85% off-topic</td></tr>
+        <tr><td style="color: var(--red-dark);">l_martinez (mismatched)</td><td>1</td><td><span class="tier-badge tier-controlled">Controlled</span></td><td>~15 queries</td><td>Marine biologist, 85% off-topic</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 0.8rem; font-size: 0.85rem;">All users seeded with real ORCID iDs from published vaccine/immunology researchers. 7 research overlap clusters: mRNA/LNP, structural/bnAbs, clinical/correlates, computational/epitopes, mucosal/innate, influenza/pandemic, viral vectors.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: Phase Progress                                           -->
+<!-- ============================================================ -->
+<div id="tab-progress" class="tab-content">
+  <div class="section-heading"><span class="icon">📊</span> Phase Overview</div>
+
+  <div class="phase-cards">
+    <!-- Phase 1 -->
+    <div class="phase-card done">
+      <div class="phase-num">Phase 1</div>
+      <div class="phase-title">Scaffolding &amp; User Management</div>
+      <span class="status-badge status-done">&#10003; Complete</span>
+      <ul class="checklist">
+        <li class="done"><span class="check">&#10003;</span> Project structure &amp; configs</li>
+        <li class="done"><span class="check">&#10003;</span> SQLite + async SQLAlchemy</li>
+        <li class="done"><span class="check">&#10003;</span> User model with tiers + ORCID</li>
+        <li class="done"><span class="check">&#10003;</span> JWT auth (register/login/me)</li>
+        <li class="done"><span class="check">&#10003;</span> Admin user CRUD endpoints</li>
+        <li class="done"><span class="check">&#10003;</span> Seed script (admin user)</li>
+        <li class="done"><span class="check">&#10003;</span> Streamlit login UI</li>
+        <li class="done"><span class="check">&#10003;</span> Admin panel (create/edit/delete)</li>
+        <li class="done"><span class="check">&#10003;</span> Dockerfiles + Compose</li>
+      </ul>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase-card done">
+      <div class="phase-num">Phase 2</div>
+      <div class="phase-title">LLM Agent Integration</div>
+      <span class="status-badge status-done">&#10003; Complete</span>
+      <ul class="checklist">
+        <li class="done"><span class="check">&#10003;</span> Anthropic SDK integration</li>
+        <li class="done"><span class="check">&#10003;</span> AgentService with tool-use loop</li>
+        <li class="done"><span class="check">&#10003;</span> Conversation history (DB-backed)</li>
+        <li class="done"><span class="check">&#10003;</span> Tier-gated tool registry (6 tools)</li>
+        <li class="done"><span class="check">&#10003;</span> Chat endpoints (send/history/reset)</li>
+        <li class="done"><span class="check">&#10003;</span> Streamlit chat UI</li>
+        <li class="done"><span class="check">&#10003;</span> Tool call visualization</li>
+      </ul>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase-card done">
+      <div class="phase-num">Phase 3</div>
+      <div class="phase-title">Three-Agent Pipeline</div>
+      <span class="status-badge status-done">&#10003; Complete</span>
+      <ul class="checklist">
+        <li class="done"><span class="check">&#10003;</span> Logger (activity logging)</li>
+        <li class="done"><span class="check">&#10003;</span> Profiler Agent (ORCID profiles)</li>
+        <li class="done"><span class="check">&#10003;</span> Detector Agent (anomaly scoring)</li>
+        <li class="done"><span class="check">&#10003;</span> 25-user seed data + simulated queries</li>
+        <li class="done"><span class="check">&#10003;</span> Warning CRUD + filters</li>
+        <li class="done"><span class="check">&#10003;</span> Verified: 2/25 flagged correctly</li>
+      </ul>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="phase-card partial">
+      <div class="phase-num">Phase 4</div>
+      <div class="phase-title">Audit &amp; Usage Tracking</div>
+      <span class="status-badge status-partial">Partial</span>
+      <ul class="checklist">
+        <li class="done"><span class="check">&#10003;</span> AuditLog model (table exists)</li>
+        <li class="done"><span class="check">&#10003;</span> LLMUsage model (table exists)</li>
+        <li><span class="check">○</span> Audit logging middleware</li>
+        <li><span class="check">○</span> Wire LLMUsage into AgentService</li>
+        <li><span class="check">○</span> GET /admin/usage endpoint</li>
+        <li><span class="check">○</span> Frontend usage dashboard</li>
+      </ul>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="phase-card todo">
+      <div class="phase-num">Phase 5</div>
+      <div class="phase-title">Frontend Enhancements</div>
+      <span class="status-badge status-todo">Not Started</span>
+      <ul class="checklist">
+        <li><span class="check">○</span> Warnings dashboard page</li>
+        <li><span class="check">○</span> Research interest in registration</li>
+        <li><span class="check">○</span> Per-user detail view</li>
+        <li><span class="check">○</span> ORCID pubs + divergence scores</li>
+      </ul>
+    </div>
+
+    <!-- Phase 6 -->
+    <div class="phase-card partial">
+      <div class="phase-num">Phase 6</div>
+      <div class="phase-title">Containerization</div>
+      <span class="status-badge status-partial">Partial</span>
+      <ul class="checklist">
+        <li class="done"><span class="check">&#10003;</span> Backend Dockerfile</li>
+        <li class="done"><span class="check">&#10003;</span> Frontend Dockerfile</li>
+        <li class="done"><span class="check">&#10003;</span> docker-compose.yml</li>
+        <li><span class="check">○</span> End-to-end Docker test</li>
+        <li><span class="check">○</span> Volume persistence verified</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Verification Matrix -->
+  <div class="card" style="margin-top: 1.5rem;">
+    <h3>✅ Verification Matrix</h3>
+    <table class="tier-table">
+      <thead><tr><th>Test</th><th>Status</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Auth Flow</td><td><span class="status-badge status-done">&#10003;</span></td><td>Register, login, JWT, protected endpoints</td></tr>
+        <tr><td>Tier Enforcement</td><td><span class="status-badge status-done">&#10003;</span></td><td>Open/Controlled blocked from admin</td></tr>
+        <tr><td>Chat + Tools</td><td><span class="status-badge status-done">&#10003;</span></td><td>Tier-appropriate tool access per user</td></tr>
+        <tr><td>Logger</td><td><span class="status-badge status-done">&#10003;</span></td><td>Queries + data access logged on every chat</td></tr>
+        <tr><td>Profiler ORCID</td><td><span class="status-badge status-done">&#10003;</span></td><td>Fetch, profile, batch refresh, cache status</td></tr>
+        <tr><td>Detector Scan</td><td><span class="status-badge status-done">&#10003;</span></td><td>Flags exactly t_chen + l_martinez; 23 pass clean</td></tr>
+        <tr><td>Warning CRUD</td><td><span class="status-badge status-done">&#10003;</span></td><td>Create via scan, list, filter, review/dismiss</td></tr>
+        <tr><td>Admin CRUD</td><td><span class="status-badge status-done">&#10003;</span></td><td>Create, edit, delete users + tier management</td></tr>
+        <tr><td>Audit Middleware</td><td><span class="status-badge status-todo">Phase 4</span></td><td>Auto-log all API requests</td></tr>
+        <tr><td>Usage Tracking</td><td><span class="status-badge status-todo">Phase 4</span></td><td>Token counts from Claude responses</td></tr>
+        <tr><td>Docker E2E</td><td><span class="status-badge status-todo">Phase 6</span></td><td>docker compose up works fully</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: Implementation Log                                       -->
+<!-- ============================================================ -->
+<div id="tab-details" class="tab-content">
+
+  <!-- Phase 1 Decisions -->
+  <div class="section-heading"><span class="icon">⚖️</span> Key Decisions &mdash; Phase 1</div>
+  <div class="decision-grid">
+    <div class="decision-item"><strong>bcrypt directly (not passlib)</strong><p>passlib is unmaintained and incompatible with bcrypt 5.x.</p></div>
+    <div class="decision-item"><strong>SQLite for prototype</strong><p>File-based, zero config. Plan to migrate to PostgreSQL.</p></div>
+    <div class="decision-item"><strong>JWT over sessions</strong><p>Stateless API auth. Frontend stores token in session state.</p></div>
+    <div class="decision-item"><strong>Separate venvs per service</strong><p>Different dependency trees; avoids conflicts.</p></div>
+    <div class="decision-item"><strong>greenlet as explicit dep</strong><p>Required by async SQLAlchemy but not auto-installed.</p></div>
+    <div class="decision-item"><strong>Uvicorn reload excludes .venv</strong><p>OneDrive syncing caused infinite reload loops.</p></div>
+  </div>
+
+  <!-- Phase 3 Scoring Decisions -->
+  <div class="section-heading" style="margin-top: 2rem;"><span class="icon">🎯</span> Key Decisions &mdash; Phase 3 (Scoring)</div>
+  <div class="decision-grid">
+    <div class="decision-item"><strong>Recall-based scoring (not Jaccard)</strong><p>Short interest strings vs long query corpora; Jaccard denominator swamps numerator.</p></div>
+    <div class="decision-item"><strong>Simple suffix stemmer</strong><p>Handles immunity/immune, vaccination/vaccine without NLTK/spaCy dependency.</p></div>
+    <div class="decision-item"><strong>Null ORCID = no pass</strong><p>Interest check alone can flag when ORCID data unavailable; prevents neutral pass.</p></div>
+    <div class="decision-item"><strong>MIN_QUERIES_FOR_SCAN = 5</strong><p>Irregular users (1-3 queries) produce meaningless scores; skip them.</p></div>
+    <div class="decision-item"><strong>INTEREST_THRESHOLD = 0.15</strong><p>Legit researchers score 0.25-1.0; mismatched score 0.0-0.125.</p></div>
+    <div class="decision-item"><strong>User-specific queries in seed</strong><p>Generic pool lacks niche keywords (e.g., "germinal center"); prevents false positives.</p></div>
+  </div>
+
+  <!-- Issues -->
+  <div class="section-heading" style="margin-top: 2rem;"><span class="icon">🐛</span> Issues Encountered &amp; Resolved</div>
+
+  <div style="margin-bottom: 0.6rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Phase 1</div>
+  <div class="issue-item"><strong>passlib + bcrypt 5.x incompatibility</strong><p>Tried to access <code>bcrypt.__about__.__version__</code> which no longer exists.</p><div class="resolution">&#10003; Switched to using bcrypt directly</div></div>
+  <div class="issue-item"><strong>Missing greenlet dependency</strong><p>Async SQLAlchemy requires greenlet but it wasn't installed automatically.</p><div class="resolution">&#10003; Added to requirements.txt</div></div>
+  <div class="issue-item"><strong>Uvicorn infinite reload loops</strong><p>OneDrive file syncing caused WatchFiles to detect .venv/ changes.</p><div class="resolution">&#10003; Added --reload-exclude '.venv'</div></div>
+  <div class="issue-item"><strong>Port 8000 zombie processes</strong><p>Killed uvicorn processes left orphan listeners.</p><div class="resolution">&#10003; lsof -ti:8000 | xargs kill -9</div></div>
+
+  <div style="margin-top: 1.5rem; margin-bottom: 0.6rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Phase 2</div>
+  <div class="issue-item"><strong>Anthropic SDK tool-use loop</strong><p>Required iterating until Claude returns a non-tool-use response.</p><div class="resolution">&#10003; While loop checking stop_reason</div></div>
+
+  <div style="margin-top: 1.5rem; margin-bottom: 0.6rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Phase 3</div>
+  <div class="issue-item"><strong>SQLite naive datetime bug</strong><p>last_refreshed from SQLite comes back as naive datetime; broke TTL comparison.</p><div class="resolution">&#10003; Check .tzinfo is None, replace with UTC</div></div>
+  <div class="issue-item"><strong>Weighted Jaccard dominated by query volume</strong><p>Query corpora have hundreds of keywords vs 8-10 in interest string; near-zero scores for everyone.</p><div class="resolution">&#10003; Switched to recall: |interest &cap; queries| / |interest|</div></div>
+  <div class="issue-item"><strong>Stemming false positives</strong><p>"immunity" (interest) didn't match "immune" (queries), flagging legitimate researchers.</p><div class="resolution">&#10003; Added aggressive suffix-stripping stemmer</div></div>
+  <div class="issue-item"><strong>Neutral pass on missing ORCID</strong><p>Original logic gave publication_score=0.5 with no ORCID data, letting mismatched users pass.</p><div class="resolution">&#10003; Track has_pub_data flag, allow interest-only flagging</div></div>
+
+  <!-- Docker Config -->
+  <div class="section-heading" style="margin-top: 2rem;"><span class="icon">🐳</span> Docker Compose Configuration</div>
+  <div class="card">
+    <div class="file-tree">services:
+  <span class="folder">backend:</span>
+    build: ./backend
+    ports: "8000:8000"
+    env_file: .env
+    volumes: db_data:/app/data
+    healthcheck: curl http://localhost:8000/health
+
+  <span class="folder">frontend:</span>
+    build: ./frontend
+    ports: "8501:8501"
+    env_file: .env
+    depends_on: backend (healthy)
+
+<span class="folder">volumes:</span>
+  db_data:  (SQLite persistence)</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: Results                                                  -->
+<!-- ============================================================ -->
+<div id="tab-results" class="tab-content">
+
+  <!-- ── Hero Summary ── -->
+  <div class="section-heading"><span class="icon">🧪</span> Agent Analysis Results</div>
+  <div class="results-summary">
+    <div class="result-stat"><div class="big accent">293</div><div class="desc">Queries Seeded</div></div>
+    <div class="result-stat"><div class="big accent">25</div><div class="desc">Users</div></div>
+    <div class="result-stat"><div class="big green">5</div><div class="desc">Detector Warnings</div></div>
+    <div class="result-stat"><div class="big green">5</div><div class="desc">Clusterer Personas</div></div>
+    <div class="result-stat"><div class="big green">4</div><div class="desc">Clusterer Anomalies</div></div>
+  </div>
+
+  <!-- ── Detection Matrix (hero) ── -->
+  <div class="card">
+    <h3>📊 Detection Matrix</h3>
+    <table class="detection-matrix">
+      <thead>
+        <tr><th style="text-align:left;">Scenario</th><th>Users</th><th>Detector</th><th>Clusterer</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mismatch (off-topic queries)</td>
+          <td>t_chen, l_martinez</td>
+          <td class="matrix-yes">HIGH + MEDIUM</td>
+          <td class="matrix-no">---</td>
+          <td><span class="verdict verdict-detected">DETECTED</span></td>
+        </tr>
+        <tr>
+          <td>Drift (topic shift mid-window)</td>
+          <td>s_crotty</td>
+          <td class="matrix-yes">MEDIUM</td>
+          <td class="matrix-no">---</td>
+          <td><span class="verdict verdict-detected">DETECTED</span></td>
+        </tr>
+        <tr>
+          <td>Drift (late-onset)</td>
+          <td>g_nabel</td>
+          <td class="matrix-no">---</td>
+          <td class="matrix-no">---</td>
+          <td><span class="verdict verdict-missed">MISSED</span></td>
+        </tr>
+        <tr>
+          <td>Collusion (coordinated probing)</td>
+          <td>k_corbett, n_pardi</td>
+          <td class="matrix-yes">HIGH + HIGH</td>
+          <td class="matrix-yes">Persona 4 + LOF</td>
+          <td><span class="verdict verdict-detected">DETECTED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Scorecard ── -->
+  <div class="card">
+    <h3>Agent Effectiveness</h3>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin: 1rem 0; text-align:center;">
+      <div>
+        <div style="font-size: 2.2rem; font-weight: 800; color: var(--green-dark);">100%</div>
+        <div style="color: var(--text-muted); font-size: 0.85rem;">Mismatch</div>
+      </div>
+      <div>
+        <div style="font-size: 2.2rem; font-weight: 800; color: var(--amber-dark);">50%</div>
+        <div style="color: var(--text-muted); font-size: 0.85rem;">Drift</div>
+      </div>
+      <div>
+        <div style="font-size: 2.2rem; font-weight: 800; color: var(--green-dark);">100%</div>
+        <div style="color: var(--text-muted); font-size: 0.85rem;">Collusion</div>
+      </div>
+      <div>
+        <div style="font-size: 2.2rem; font-weight: 800; color: var(--green-dark);">83%</div>
+        <div style="color: var(--text-muted); font-size: 0.85rem;">Overall (5/6)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- DETECTOR RESULTS                               -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-heading"><span class="icon">🔍</span> Detector Agent: Content Divergence</div>
+
+  <div class="card">
+    <h3>Warnings Issued</h3>
+    <table class="evidence-table">
+      <thead><tr><th>User</th><th>Severity</th><th>Interest Score</th><th>Queries</th><th>Scenario</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>t_chen</strong></td>
+          <td><strong style="color:var(--red-dark);">HIGH</strong></td>
+          <td><span class="score-bar high" style="width:4px;"></span> 0.000</td>
+          <td>12</td>
+          <td>Astrophysicist querying blockchain, metallurgy, aerosols</td>
+        </tr>
+        <tr>
+          <td><strong>k_corbett</strong></td>
+          <td><strong style="color:var(--red-dark);">HIGH</strong></td>
+          <td><span class="score-bar high" style="width:4px;"></span> 0.000</td>
+          <td>20</td>
+          <td>mRNA researcher probing for credentials, API keys, bypass methods</td>
+        </tr>
+        <tr>
+          <td><strong>n_pardi</strong></td>
+          <td><strong style="color:var(--red-dark);">HIGH</strong></td>
+          <td><span class="score-bar high" style="width:4px;"></span> 0.000</td>
+          <td>20</td>
+          <td>LNP researcher probing for credentials, API keys, bypass methods</td>
+        </tr>
+        <tr>
+          <td><strong>s_crotty</strong></td>
+          <td><strong style="color:var(--amber-dark);">MEDIUM</strong></td>
+          <td><span class="score-bar medium" style="width:16px;"></span> 0.125</td>
+          <td>15</td>
+          <td>Germinal center biologist drifting to fintech queries</td>
+        </tr>
+        <tr>
+          <td><strong>l_martinez</strong></td>
+          <td><strong style="color:var(--amber-dark);">MEDIUM</strong></td>
+          <td><span class="score-bar medium" style="width:16px;"></span> 0.125</td>
+          <td>17</td>
+          <td>Marine biologist querying quantum computing, geology, metallurgy</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 0.8rem;">
+      <strong>0 false positives</strong> among 20 legitimate vaccine researchers (interest scores 0.33-1.0).
+      Detector uses recall-based keyword overlap: <code>|interest_keywords &cap; query_keywords| / |interest_keywords|</code>.
+      Threshold: 0.15. Below = flagged.
+    </p>
+  </div>
+
+  <!-- Drift detail -->
+  <div class="arch-grid">
+    <div class="finding-card partial">
+      <h3><span class="verdict verdict-detected">DETECTED</span> s_crotty drift</h3>
+      <div class="timeline-row"><span class="timeline-dot on-topic"></span><span class="timeline-ts">May 17</span> Bcl-6 in germinal center B cell differentiation</div>
+      <div class="timeline-row"><span class="timeline-dot on-topic"></span><span class="timeline-ts">May 20</span> HIV vaccine challenges</div>
+      <div class="timeline-row"><span class="timeline-dot on-topic"></span><span class="timeline-ts">May 23</span> Immunogenicity assessment methods</div>
+      <div class="timeline-row"><span class="timeline-dot drift"></span><span class="timeline-ts">May 24</span> Flash loan attacks in DeFi protocols</div>
+      <div class="timeline-row"><span class="timeline-dot drift"></span><span class="timeline-ts">May 27</span> Decentralized exchange microstructure</div>
+      <div class="timeline-row"><span class="timeline-dot drift"></span><span class="timeline-ts">May 28</span> Smart contracts cross-chain transfers</div>
+      <div class="timeline-row"><span class="timeline-dot drift"></span><span class="timeline-ts">May 30</span> Options pricing in volatile markets</div>
+      <p style="color:var(--text-muted); font-size:0.82rem; margin-top:0.5rem;">Enough off-topic queries accumulated to push interest score below threshold.</p>
+    </div>
+    <div class="finding-card missed">
+      <h3><span class="verdict verdict-missed">MISSED</span> g_nabel drift</h3>
+      <div class="timeline-row"><span class="timeline-dot on-topic"></span><span class="timeline-ts">May 17</span> Lipid nanoparticle mRNA delivery</div>
+      <div class="timeline-row"><span class="timeline-dot on-topic"></span><span class="timeline-ts">May 18</span> Structure-based vaccine immunogen design</div>
+      <div class="timeline-row"><span class="timeline-dot on-topic"></span><span class="timeline-ts">May 23</span> Viral mutations and vaccine efficacy</div>
+      <div class="timeline-row"><span class="timeline-dot on-topic"></span><span class="timeline-ts">May 26</span> Viral vector platforms for vaccines</div>
+      <div class="timeline-row"><span class="timeline-dot drift"></span><span class="timeline-ts">May 28</span> API vulnerability exploitation</div>
+      <div class="timeline-row"><span class="timeline-dot drift"></span><span class="timeline-ts">May 30</span> Ransomware data exfiltration</div>
+      <p style="color:var(--text-muted); font-size:0.82rem; margin-top:0.5rem;">Only 3/14 queries off-topic (21%). Interest score 0.571, well above 0.15 threshold. Late-onset drift invisible to aggregate scoring.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- CLUSTERER RESULTS                               -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-heading"><span class="icon">📈</span> Clusterer Agent: Behavioral Clustering</div>
+
+  <div class="card">
+    <h3>Persona Clustering (KMeans, k=5)</h3>
+    <p style="margin-bottom:1rem; color:var(--text-muted); font-size:0.9rem;">33 features (volume, timing, prompt length, TF-IDF text). Silhouette-optimized.</p>
+    <div class="persona-grid">
+      <div class="persona-box">
+        <h4>P4: Standard Researchers</h4>
+        <div class="count">23</div>
+        <div class="features"><span>Normal volume</span><span>Working hours</span><span>Moderate active days</span></div>
+        <div class="members">b_graham, p_hotez, j_bloom, f_krammer, s_plotkin, g_nabel, r_rappuoli, h_virgin, d_burton, a_sette, s_crotty, m_moore, l_corey, d_kaslow, t_chen, l_martinez, j_mascola, p_offit, k_edwards, w_orenstein, a_garcia, r_ahmed, k_dooling</div>
+      </div>
+      <div class="persona-box" style="border-top-color: var(--pink);">
+        <h4>P1: Power Users</h4>
+        <div class="count">5</div>
+        <div class="features"><span>High volume</span><span>Long prompts</span><span>Many active days</span></div>
+        <div class="members">s_gilbert, k_kariko, u_sahin, a_iwasaki, b_pulend</div>
+      </div>
+      <div class="persona-box" style="border-top-color: var(--red-dark);">
+        <h4>P2: Collusion Pair</h4>
+        <div class="count">2</div>
+        <div class="features"><span>Single active day</span><span>2 AM burst</span><span>20 queries in 40 min</span></div>
+        <div class="members" style="color: var(--red-dark);">k_corbett, n_pardi</div>
+      </div>
+      <div class="persona-box" style="border-top-color: var(--orange);">
+        <h4>Singletons</h4>
+        <div class="count">2</div>
+        <div class="features"><span>Extreme outliers</span><span>Own persona each</span></div>
+        <div class="members">d_weissman (P0), m_nussenz (P3)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>LOF Cross-User Anomalies (contamination=10%)</h3>
+    <table class="evidence-table">
+      <thead><tr><th>User</th><th>LOF Score</th><th>Persona</th><th>Status</th><th>Why Flagged</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>a_iwasaki</strong></td>
+          <td style="color:var(--red-dark); font-weight:700;">+1.534</td>
+          <td>P5 (singleton)</td>
+          <td class="matrix-yes">FLAGGED</td>
+          <td>Edge between power-user and standard clusters</td>
+        </tr>
+        <tr>
+          <td><strong>m_nussenz</strong></td>
+          <td style="color:var(--red-dark); font-weight:700;">+1.322</td>
+          <td>P3 (singleton)</td>
+          <td class="matrix-yes">FLAGGED</td>
+          <td>Extreme timing, fewest queries, unique text signature</td>
+        </tr>
+        <tr style="background: rgba(239,68,68,0.05);">
+          <td><strong>k_corbett</strong></td>
+          <td style="color:var(--red-dark); font-weight:700;">+1.278</td>
+          <td style="color:var(--red-dark);">P2 (collusion)</td>
+          <td class="matrix-yes">FLAGGED</td>
+          <td>Single-day 2 AM burst, 20 rapid-fire queries, suspicious text</td>
+        </tr>
+        <tr style="background: rgba(239,68,68,0.05);">
+          <td><strong>n_pardi</strong></td>
+          <td style="color:var(--red-dark); font-weight:700;">+1.278</td>
+          <td style="color:var(--red-dark);">P2 (collusion)</td>
+          <td class="matrix-yes">FLAGGED</td>
+          <td>Identical behavioral pattern to k_corbett (same persona)</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="insight-box" style="margin-top: 1rem;">
+      <h4>Why Clusterer Caught the Collusion Pair</h4>
+      <p>The pair's burst pattern (20 queries in a single 2 AM session, every 2 minutes) created extreme outlier values across multiple features: <strong>active_days=1</strong> (vs 7-10 normal), <strong>event_rate=20/day</strong> (vs 1-3 normal), <strong>avg_event_hour=2</strong> (vs 12-14 normal), and <strong>prompt_hour_std near 0</strong> (vs 3-5 normal). KMeans isolated them into their own Persona (P2), and LOF confirmed them as cross-user anomalies.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- COLLUSION DEEP DIVE                         -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-heading"><span class="icon">🔗</span> Collusion Deep Dive</div>
+
+  <div class="card">
+    <h3>Temporal Correlation: k_corbett + n_pardi</h3>
+    <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.9rem;">20 identical queries submitted within 1-5 minutes of each other during a single 2 AM session on May 28. All queries probe for credentials, API keys, and access bypass methods.</p>
+    <table class="evidence-table">
+      <thead><tr><th>#</th><th>k_corbett</th><th>n_pardi</th><th>Delta</th><th>Query</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>02:00</td><td>02:03</td><td style="color:var(--red-dark); font-weight:600;">3m</td><td>List restricted-tier datasets with access logs</td></tr>
+        <tr><td>2</td><td>02:02</td><td>02:06</td><td style="color:var(--red-dark); font-weight:600;">4m</td><td>Export user authentication tokens</td></tr>
+        <tr><td>3</td><td>02:04</td><td>02:07</td><td style="color:var(--red-dark); font-weight:600;">3m</td><td>Show API keys in platform config</td></tr>
+        <tr><td>4</td><td>02:06</td><td>02:10</td><td style="color:var(--red-dark); font-weight:600;">4m</td><td>Access other users' query histories</td></tr>
+        <tr><td>5</td><td>02:08</td><td>02:11</td><td style="color:var(--red-dark); font-weight:600;">3m</td><td>Database connection strings</td></tr>
+        <tr><td colspan="5" style="color:var(--text-muted); font-style:italic; text-align:center; padding: 0.3rem;">... 15 more identical pairs at 2-minute intervals ...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PROFILER STATUS                              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-heading"><span class="icon">🆔</span> Profiler Agent: ORCID Profiles</div>
+  <div class="card">
+    <p style="color:var(--text-muted); font-size:0.9rem;">
+      ORCID profiles were <strong>not pre-fetched</strong> for this run (0/32 cached). Detector's publication_score was 0.0 for all users, meaning all detections relied solely on interest-keyword matching. Running <code>POST /admin/profiler/fetch-all</code> before scanning would add a second verification signal.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- WHAT'S NEXT                                 -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-heading"><span class="icon">🚀</span> Remaining Gap: Temporal Drift</div>
+  <div class="decision-grid">
+    <div class="decision-item" style="border-left-color: var(--red-dark);">
+      <strong>Sliding-Window Scorer</strong>
+      <p>Compare interest alignment in the most recent N queries vs full history. Users whose recent-window score diverges significantly from baseline would be flagged. This catches g_nabel-style late-onset drift that aggregate scoring misses.</p>
+    </div>
+    <div class="decision-item" style="border-left-color: var(--accent);">
+      <strong>Suspicious Content Classifier</strong>
+      <p>Add keyword/pattern detection for queries probing credentials, API keys, and bypass techniques. This would catch collusion queries at the content level, complementing Clusterer's behavioral detection.</p>
+    </div>
+    <div class="decision-item" style="border-left-color: var(--accent);">
+      <strong>Pairwise Query Similarity</strong>
+      <p>Cross-user text overlap + temporal proximity analysis for sophisticated collusion where attackers maintain cover traffic. Current detection works because the pair had no cover; this would catch smarter adversaries.</p>
+    </div>
+    <div class="decision-item" style="border-left-color: var(--green-dark);">
+      <strong>Pre-fetch ORCID Profiles</strong>
+      <p>Wire Profiler's fetch-all into onboarding so publication scores are available for dual-signal cross-check.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: Roadmap                                                  -->
+<!-- ============================================================ -->
+<div id="tab-roadmap" class="tab-content">
+  <div class="section-heading"><span class="icon">🗺️</span> Build Roadmap</div>
+
+  <div class="mermaid-container">
+    <pre class="mermaid">
+gantt
+    title TCP Build Phases
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %d
+
+    section Phase 1 — Scaffolding
+    Project structure            :done,    p1a, 2026-05-30, 1d
+    User model + auth            :done,    p1b, after p1a, 1d
+    Admin endpoints              :done,    p1c, after p1b, 1d
+    Frontend auth + admin        :done,    p1d, after p1c, 1d
+
+    section Phase 2 — Claude Agent
+    Anthropic SDK + AgentService :done,    p2a, 2026-05-31, 1d
+    Tier-gated tool registry     :done,    p2b, after p2a, 1d
+    Chat endpoints + UI          :done,    p2c, after p2b, 1d
+
+    section Phase 3 — Agent Pipeline
+    Logger              :done,    p3a, after p2c, 1d
+    Profiler (ORCID profiles)     :done,    p3b, after p3a, 1d
+    Detector (anomaly detection)    :done,    p3c, after p3b, 1d
+    Seed data (25 users)         :done,    p3d, after p3c, 1d
+
+    section Phase 4 — Audit
+    Audit middleware             :active,  p4a, after p3d, 1d
+    LLM usage tracking          :         p4b, after p4a, 1d
+    Usage dashboard              :         p4c, after p4b, 1d
+
+    section Phase 5 — Frontend
+    Warnings dashboard           :         p5a, after p4c, 1d
+    User detail views            :         p5b, after p5a, 1d
+
+    section Phase 6 — Docker
+    E2E test + verify            :         p6a, after p5b, 1d
+    </pre>
+  </div>
+
+  <!-- What's Next -->
+  <div class="section-heading"><span class="icon">🎯</span> Up Next</div>
+  <div class="arch-grid">
+    <div class="card">
+      <h3>Phase 4: Audit &amp; Usage</h3>
+      <p>Wire AuditLog middleware to auto-log every API request. Capture token counts from Claude API responses into LLMUsage. Build GET /admin/usage endpoint + Streamlit usage dashboard with charts.</p>
+    </div>
+    <div class="card">
+      <h3>Phase 5: Frontend</h3>
+      <p>Admin warnings dashboard showing Detector scan results. Per-user detail view with ORCID publications, query history, and live divergence scores. Research interest in registration form.</p>
+    </div>
+  </div>
+
+  <!-- Future Vision -->
+  <div class="section-heading"><span class="icon">🔮</span> Future Vision (Post-Prototype)</div>
+  <div class="arch-grid">
+    <div class="card">
+      <h3>🕵️ Real-Time Anomaly Stream</h3>
+      <p>Run Detector continuously on the audit stream instead of admin-triggered scans. Alert on first deviation, not just batch analysis.</p>
+    </div>
+    <div class="card">
+      <h3>📊 Cost Guardian Agent</h3>
+      <p>Monitor LLM usage for cost spikes, unusual query patterns, and prompt injection attempts in real time.</p>
+    </div>
+    <div class="card">
+      <h3>🔄 Multi-Model Support</h3>
+      <p>Abstract LLM behind service interface for GPT, Gemini, etc. Model-per-tier or user-selectable.</p>
+    </div>
+    <div class="card">
+      <h3>🔐 OAuth / SSO</h3>
+      <p>Replace username/password with institutional SSO. Map ORCID iD from IdP claims automatically.</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  TCP Hackathon &bull; Built with FastAPI + Streamlit + Claude + ORCID &bull; May 2026
+</div>
+
+<script>
+  function switchTab(btn, tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#334155',
+      primaryTextColor: '#f1f5f9',
+      primaryBorderColor: '#818cf8',
+      lineColor: '#818cf8',
+      secondaryColor: '#1e293b',
+      tertiaryColor: '#0f172a',
+      fontFamily: 'Segoe UI, system-ui, sans-serif'
+    },
+    flowchart: { curve: 'basis', padding: 20 },
+    gantt: { barHeight: 20, fontSize: 12, sectionFontSize: 14 },
+    sequence: { mirrorActors: false, messageAlign: 'left' }
+  });
+
+  window.addEventListener('load', () => {
+    const fill = document.querySelector('.progress-bar-fill');
+    fill.style.width = '0%';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { fill.style.width = '75%'; });
+    });
+  });
+</script>
+</body>
+</html>

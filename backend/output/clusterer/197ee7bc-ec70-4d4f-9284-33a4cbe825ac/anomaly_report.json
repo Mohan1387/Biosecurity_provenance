@@ -1,0 +1,331 @@
+{
+  "event_anomalies": [
+    {
+      "prompt_id": 78,
+      "prompt_length": 83.0,
+      "response_length": 33.0,
+      "user_id": 5,
+      "within_user_anomaly": true,
+      "within_user_anomaly_score": 3.1376708561810402
+    },
+    {
+      "prompt_id": 266,
+      "prompt_length": 83.0,
+      "response_length": 33.0,
+      "user_id": 24,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.555580472573853
+    },
+    {
+      "prompt_id": 52,
+      "prompt_length": 83.0,
+      "response_length": 33.0,
+      "user_id": 4,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.4534002201280494
+    },
+    {
+      "prompt_id": 245,
+      "prompt_length": 83.0,
+      "response_length": 33.0,
+      "user_id": 23,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.3628946015424597
+    },
+    {
+      "prompt_id": 97,
+      "prompt_length": 43.0,
+      "response_length": 33.0,
+      "user_id": 6,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.327529946335219
+    },
+    {
+      "prompt_id": 210,
+      "prompt_length": 46.0,
+      "response_length": 33.0,
+      "user_id": 19,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.271720556255607
+    },
+    {
+      "prompt_id": 64,
+      "prompt_length": 43.0,
+      "response_length": 33.0,
+      "user_id": 4,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.1931911058720446
+    },
+    {
+      "prompt_id": 214,
+      "prompt_length": 43.0,
+      "response_length": 33.0,
+      "user_id": 20,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.181609841171444
+    },
+    {
+      "prompt_id": 189,
+      "prompt_length": 46.0,
+      "response_length": 33.0,
+      "user_id": 17,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.106451738611085
+    },
+    {
+      "prompt_id": 168,
+      "prompt_length": 46.0,
+      "response_length": 33.0,
+      "user_id": 15,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.0819406437050034
+    },
+    {
+      "prompt_id": 246,
+      "prompt_length": 43.0,
+      "response_length": 33.0,
+      "user_id": 23,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 2.0263832960596333
+    },
+    {
+      "prompt_id": 169,
+      "prompt_length": 43.0,
+      "response_length": 33.0,
+      "user_id": 16,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.9668901129493508
+    },
+    {
+      "prompt_id": 150,
+      "prompt_length": 73.0,
+      "response_length": 33.0,
+      "user_id": 14,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.9035966148041863
+    },
+    {
+      "prompt_id": 125,
+      "prompt_length": 43.0,
+      "response_length": 33.0,
+      "user_id": 12,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.8766297265136729
+    },
+    {
+      "prompt_id": 9,
+      "prompt_length": 75.0,
+      "response_length": 33.0,
+      "user_id": 2,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.8641092980036
+    },
+    {
+      "prompt_id": 180,
+      "prompt_length": 83.0,
+      "response_length": 33.0,
+      "user_id": 16,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.8576184400077205
+    },
+    {
+      "prompt_id": 272,
+      "prompt_length": 45.0,
+      "response_length": 33.0,
+      "user_id": 25,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.852911494030294
+    },
+    {
+      "prompt_id": 145,
+      "prompt_length": 70.0,
+      "response_length": 33.0,
+      "user_id": 13,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.7615854153435697
+    },
+    {
+      "prompt_id": 44,
+      "prompt_length": 70.0,
+      "response_length": 33.0,
+      "user_id": 3,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.7615854153435697
+    },
+    {
+      "prompt_id": 196,
+      "prompt_length": 53.0,
+      "response_length": 33.0,
+      "user_id": 18,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.7195628955418107
+    },
+    {
+      "prompt_id": 153,
+      "prompt_length": 53.0,
+      "response_length": 33.0,
+      "user_id": 14,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.6937513186840392
+    },
+    {
+      "prompt_id": 229,
+      "prompt_length": 73.0,
+      "response_length": 33.0,
+      "user_id": 21,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.6849034997697483
+    },
+    {
+      "prompt_id": 167,
+      "prompt_length": 70.0,
+      "response_length": 33.0,
+      "user_id": 15,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.6749447283942516
+    },
+    {
+      "prompt_id": 99,
+      "prompt_length": 49.0,
+      "response_length": 33.0,
+      "user_id": 6,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.6703450203111572
+    },
+    {
+      "prompt_id": 238,
+      "prompt_length": 53.0,
+      "response_length": 33.0,
+      "user_id": 22,
+      "within_user_anomaly": false,
+      "within_user_anomaly_score": 1.650030690416908
+    }
+  ],
+  "user_anomalies": [
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 1.0024693709567973,
+      "user_id": 2
+    },
+    {
+      "cross_user_anomaly": true,
+      "cross_user_anomaly_score": 1.1046064998740408,
+      "user_id": 3
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 1.000348192257746,
+      "user_id": 4
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9983856934413333,
+      "user_id": 5
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 1.0019172443350004,
+      "user_id": 6
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9951349174038612,
+      "user_id": 7
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9987511918619736,
+      "user_id": 8
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 1.0397686188908832,
+      "user_id": 9
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9942962734452866,
+      "user_id": 10
+    },
+    {
+      "cross_user_anomaly": true,
+      "cross_user_anomaly_score": 1.0675622088696528,
+      "user_id": 11
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9935556264435654,
+      "user_id": 12
+    },
+    {
+      "cross_user_anomaly": true,
+      "cross_user_anomaly_score": 1.1046064998740408,
+      "user_id": 13
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.997027275021545,
+      "user_id": 14
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9967417539812523,
+      "user_id": 15
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 1.0038032866315783,
+      "user_id": 16
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9955996628049008,
+      "user_id": 17
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 1.0051139232680393,
+      "user_id": 18
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 1.0052699382768515,
+      "user_id": 19
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9928108919608425,
+      "user_id": 20
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9925900872088805,
+      "user_id": 21
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 1.004391371655791,
+      "user_id": 22
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 1.0005637384059003,
+      "user_id": 23
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9983607572464427,
+      "user_id": 24
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9995711076944109,
+      "user_id": 25
+    },
+    {
+      "cross_user_anomaly": false,
+      "cross_user_anomaly_score": 0.9977975609699173,
+      "user_id": 26
+    }
+  ]
+}
